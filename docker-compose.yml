@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: byepo_feature_flags
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && cd backend && npx prisma generate && npx prisma db push && npm run dev"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/byepo_feature_flags?schema=public
+      - JWT_SECRET=supersecretjwtkey
+      - SUPER_ADMIN_EMAIL=admin@byepo.com
+      - SUPER_ADMIN_PASSWORD=admin123
+      - PORT=5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+  super-admin-frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && PORT=3000 npm run dev:super-admin"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  admin-frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && PORT=3001 npm run dev:admin"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+
+  user-frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && PORT=3002 npm run dev:user"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    ports:
+      - "3002:3002"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

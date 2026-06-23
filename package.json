@@ -1,0 +1,19 @@
+{
+  "name": "byepo-feature-flag-system",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:super-admin": "npm run dev --workspace=frontend/super-admin",
+    "dev:admin": "npm run dev --workspace=frontend/admin",
+    "dev:user": "npm run dev --workspace=frontend/user",
+    "docker:super-admin": "docker-compose up --build db backend super-admin-frontend",
+    "docker:admin": "docker-compose up --build db backend admin-frontend",
+    "docker:user": "docker-compose up --build db backend user-frontend",
+    "docker:all": "docker-compose up --build"
+  }
+}
